@@ -3448,7 +3448,9 @@ robothaxe.utilities.statemachine.FSMInjector = $hxClasses["robothaxe.utilities.s
 };
 robothaxe.utilities.statemachine.FSMInjector.__name__ = ["robothaxe","utilities","statemachine","FSMInjector"];
 robothaxe.utilities.statemachine.FSMInjector.prototype = {
-	eventDispatcher: null
+	fsm: null
+	,stateList: null
+	,eventDispatcher: null
 	,inject: function(stateMachine) {
 		var state;
 		var _g = 0, _g1 = this.get_states();
@@ -3458,21 +3460,6 @@ robothaxe.utilities.statemachine.FSMInjector.prototype = {
 			stateMachine.registerState(state1,this.isInitial(state1.name));
 		}
 		stateMachine.onRegister();
-	}
-	,states: null
-	,get_states: function() {
-		if(this.stateList == null) {
-			this.stateList = new Array();
-			var stateDef;
-			var state;
-			var $it0 = this.fsm.elementsNamed("state");
-			while( $it0.hasNext() ) {
-				var stateDef1 = $it0.next();
-				state = this.createState(stateDef1);
-				this.stateList.push(state);
-			}
-		}
-		return this.stateList;
 	}
 	,createState: function(stateDef) {
 		var name = stateDef.get("name");
@@ -3492,8 +3479,21 @@ robothaxe.utilities.statemachine.FSMInjector.prototype = {
 		var initial = this.fsm.get("initial");
 		return stateName == initial;
 	}
-	,fsm: null
-	,stateList: null
+	,states: null
+	,get_states: function() {
+		if(this.stateList == null) {
+			this.stateList = new Array();
+			var stateDef;
+			var state;
+			var $it0 = this.fsm.elementsNamed("state");
+			while( $it0.hasNext() ) {
+				var stateDef1 = $it0.next();
+				state = this.createState(stateDef1);
+				this.stateList.push(state);
+			}
+		}
+		return this.stateList;
+	}
 	,__class__: robothaxe.utilities.statemachine.FSMInjector
 	,__properties__: {get_states:"get_states"}
 }
@@ -3506,10 +3506,7 @@ robothaxe.utilities.statemachine.State = $hxClasses["robothaxe.utilities.statema
 };
 robothaxe.utilities.statemachine.State.__name__ = ["robothaxe","utilities","statemachine","State"];
 robothaxe.utilities.statemachine.State.prototype = {
-	name: null
-	,entering: null
-	,exiting: null
-	,changed: null
+	transitions: null
 	,defineTrans: function(action,target) {
 		if(this.getTarget(action) != null) return;
 		this.transitions[action] = target;
@@ -3520,7 +3517,10 @@ robothaxe.utilities.statemachine.State.prototype = {
 	,getTarget: function(action) {
 		return Reflect.field(this.transitions,action);
 	}
-	,transitions: null
+	,name: null
+	,entering: null
+	,exiting: null
+	,changed: null
 	,__class__: robothaxe.utilities.statemachine.State
 }
 robothaxe.utilities.statemachine.StateEvent = $hxClasses["robothaxe.utilities.statemachine.StateEvent"] = function(type,action,data) {
@@ -3531,11 +3531,11 @@ robothaxe.utilities.statemachine.StateEvent = $hxClasses["robothaxe.utilities.st
 robothaxe.utilities.statemachine.StateEvent.__name__ = ["robothaxe","utilities","statemachine","StateEvent"];
 robothaxe.utilities.statemachine.StateEvent.__super__ = robothaxe.event.Event;
 robothaxe.utilities.statemachine.StateEvent.prototype = $extend(robothaxe.event.Event.prototype,{
-	action: null
-	,data: null
-	,clone: function() {
+	clone: function() {
 		return new robothaxe.utilities.statemachine.StateEvent(this.type,this.action,this.data);
 	}
+	,action: null
+	,data: null
 	,__class__: robothaxe.utilities.statemachine.StateEvent
 });
 robothaxe.utilities.statemachine.StateMachine = $hxClasses["robothaxe.utilities.statemachine.StateMachine"] = function(eventDispatcher) {
@@ -3548,7 +3548,6 @@ robothaxe.utilities.statemachine.StateMachine.prototype = {
 	,initial: null
 	,canceled: null
 	,_currentState: null
-	,eventDispatcher: null
 	,onRegister: function() {
 		this.eventDispatcher.addEventListener("action",this.handleStateAction.$bind(this));
 		this.eventDispatcher.addEventListener("cancel",this.handleStateCancel.$bind(this));
@@ -3601,6 +3600,7 @@ robothaxe.utilities.statemachine.StateMachine.prototype = {
 	,get_currentStateName: function() {
 		return this._currentState.name;
 	}
+	,eventDispatcher: null
 	,__class__: robothaxe.utilities.statemachine.StateMachine
 	,__properties__: {get_currentStateName:"get_currentStateName"}
 }

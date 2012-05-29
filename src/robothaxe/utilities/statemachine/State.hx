@@ -1,21 +1,24 @@
 package robothaxe.utilities.statemachine;
 
+/**
+* Class State represents one state in state machine and holds information
+* about possible transitions to other states from current one.
+**/
 class State {
 
-    // The state name
-    public var name:String;
+    //---------------------------------------------------------------------
+    //  Variables
+    //---------------------------------------------------------------------
 
-    // The notification to dispatch when entering the state
-    public var entering:String;
+    /** @private Transition map of actions to target states **/
+    private var transitions:Dynamic;
 
-    // The notification to dispatch when exiting the state
-    public var exiting:String;
-
-    // The notification to dispatch when the state has actually changed
-    public var changed:String;
+    //---------------------------------------------------------------------
+    //  Constructor
+    //---------------------------------------------------------------------
 
     /**
-    * Constructor.
+    * Create new instance of State object.
     *
     * @param id         The id of the state.
     * @param entering   An optional event name to be sent when entering this state.
@@ -31,6 +34,9 @@ class State {
         transitions = {};
     }
 
+    //---------------------------------------------------------------------
+    //  Transition manipulation
+    //---------------------------------------------------------------------
 
     /**
     * Define a transition.
@@ -54,6 +60,10 @@ class State {
         Reflect.deleteField(transitions, action);
     }
 
+    //---------------------------------------------------------------------
+    //  State manipulation
+    //---------------------------------------------------------------------
+
     /**
     * Get the target state name for a given action.
     */
@@ -63,9 +73,28 @@ class State {
         return Reflect.field(transitions, action);
     }
 
+    //---------------------------------------------------------------------
+    //  Properties
+    //---------------------------------------------------------------------
+
     /**
-    * Transition map of actions to target states
-    */
-    private var transitions:Dynamic;
+    * The state name.
+    **/
+    public var name:String;
+
+    /**
+    * The notification to dispatch when entering the state.
+    **/
+    public var entering:String;
+
+    /**
+    * The notification to dispatch when exiting the state.
+    **/
+    public var exiting:String;
+
+    /**
+    * The notification to dispatch when the state has actually changed.
+    **/
+    public var changed:String;
 
 }

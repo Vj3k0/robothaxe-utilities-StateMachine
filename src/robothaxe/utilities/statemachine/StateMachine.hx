@@ -2,31 +2,37 @@ package robothaxe.utilities.statemachine;
 
 import robothaxe.event.IEventDispatcher;
 
+/**
+* Class StateMachine represents finite-state machine with mapped states
+* and transitions from FSMInjector class.
+* State machine is updated through events because eventDispatcher instance is shared.
+**/
 class StateMachine {
 
-    /**
-    * Map of States objects by name.
-    */
+    //---------------------------------------------------------------------
+    //  Variables
+    //---------------------------------------------------------------------
+
+    /** @private Map of States objects by name. **/
     private var states:Dynamic;
 
-    /**
-    * The initial state of the FSM.
-    */
+    /** @private The initial state of the FSM. **/
     private var initial:State;
 
-    /**
-    * The transition has been canceled.
-    */
+    /** @private The transition has been canceled. **/
     private var canceled:Bool;
 
+    /** @private Current state in which is state machine. **/
     private var _currentState:State;
 
-    public var eventDispatcher:IEventDispatcher;
+    //---------------------------------------------------------------------
+    //  Constructor
+    //---------------------------------------------------------------------
 
     /**
-    * StateMachine Constructor
+    * Create new instance of StateMachine.
     *
-    * @param eventDispatcher an event dispatcher used to communicate with interested actors.
+    * @param eventDispatcher An event dispatcher used to communicate with interested actors.
     * This is typically the Robothaxe framework event dispatcher.
     *
     */
@@ -36,6 +42,9 @@ class StateMachine {
         states = {};
     }
 
+    /**
+    * Register state machine with the facade.
+    **/
     public function onRegister():Void
     {
         eventDispatcher.addEventListener( StateEvent.ACTION, handleStateAction );
@@ -43,6 +52,11 @@ class StateMachine {
         if ( initial != null ) transitionTo( initial, null );
     }
 
+    //---------------------------------------------------------------------
+    //  Handlers
+    //---------------------------------------------------------------------
+
+    /** @private Transition to new state if action is mapped in current state. **/
     private function handleStateAction(event:StateEvent):Void
     {
         var newStateTarget:String = _currentState.getTarget( event.action );
@@ -54,16 +68,21 @@ class StateMachine {
             transitionTo( newState, event.data );
     }
 
+    /** @private Cancel transition. **/
     private function handleStateCancel(event:StateEvent):Void
     {
         canceled = true;
     }
 
+    //---------------------------------------------------------------------
+    //  State manipulation
+    //---------------------------------------------------------------------
+
     /**
     * Registers the entry and exit commands for a given state.
     *
-    * @param state the state to which to register the above commands
-    * @param initial boolean telling if this is the initial state of the system
+    * @param state The state to which to register the above commands.
+    * @param initial Bool telling if this is the initial state of the system.
     */
     public function registerState( state:State, initial:Bool=false ):Void
     {
@@ -74,11 +93,11 @@ class StateMachine {
 
     /**
     * Remove a state mapping.
-    * <P>
-    * Removes the entry and exit commands for a given state
-    * as well as the state mapping itself.</P>
     *
-    * @param state
+    * <p>Removes the entry and exit commands for a given state
+    * as well as the state mapping itself.</p>
+    *
+    * @param stateName Name of the state to remove from state machine.
     */
     public function removeState( stateName:String ):Void
     {
@@ -89,22 +108,25 @@ class StateMachine {
 
     /**
     * Transitions to the given state from the current state.
-    * <P>
-    * Sends the <code>exiting</code> StateEvent for the current state
+    *
+    * <p>Sends the <code>exiting</code> StateEvent for the current state
     * followed by the <code>entering</code> StateEvent for the new state.
     * Once finally transitioned to the new state, the <code>changed</code>
-    * StateEvent for the new state is sent.</P>
-    * <P>
+    * StateEvent for the new state is sent.</p>
+    *
+    * <p>
     * If a data parameter is provided, it is included as the body of all
-    * three state-specific transition notes.</P>
-    * <P>
-    * Finally, when all the state-specific transition notes have been
+    * three state-specific transition notes.</p>
+    *
+    * <p>Finally, when all the state-specific transition notes have been
     * sent, a <code>StateEvent.CHANGED</code> event is sent, with the
     * new <code>State</code> object as the <code>body</code> and the name of the
-    * new state in the <code>type</code>.
+    * new state in the <code>type</code>.</p>
     *
     * @param nextState  The next State to transition to.
-    * @param data       An optional object that was sent in the <code>StateEvent.ACTION</code> event
+    * @param data       An optional object that was sent in the <code>StateEvent.ACTION</code> event.
+    *
+    * @private
     */
     private function transitionTo( nextState:State, data:Dynamic=null ):Void
     {
@@ -144,13 +166,26 @@ class StateMachine {
 
     }
 
+    //---------------------------------------------------------------------
+    //  Properties
+    //---------------------------------------------------------------------
 
+    /**
+    * Current state name of state machine.
+    **/
     public var currentStateName(get_currentStateName, null):String;
 
-    public function get_currentStateName():String
+    /** @private **/
+    private function get_currentStateName():String
     {
         return _currentState.name;
     }
+
+    /**
+    * An event dispatcher used to communicate with interested actors.
+    * This is typically the Robothaxe framework event dispatcher.
+    **/
+    public var eventDispatcher:IEventDispatcher;
 
 
 }
